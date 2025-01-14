@@ -77,7 +77,7 @@ def countdown(time_left):
         messagebox.showinfo("Pomodoro Complete", "Time is up! Take a break and stretch!")
         stop_session()
 
-# --- GUI ---
+# --- GUI SETUP ---
 
 root = tk.Tk()
 root.title("Posture Monitor")
@@ -104,8 +104,17 @@ def initialize_connection():
         posture_label.config(text="Connection established! Please calibrate in order to start.", bg="green")
         btn_calibrate.config(state="normal")
         btn_start.config(state="normal")
-    else:
-        posture_label.config(text="Connection failed! Please try connecting the board and try again...", bg="red")
+    else: 
+        failure_label = tk.Label(root, text="Connection failed! Please try connecting the board and try again...", font=("Arial", 24), bg="lightcoral", width=50, height=10)
+        failure_label.place(relx=0.5, rely=0.5, anchor="center")
+        btn_calibrate.config(state="disabled")
+        btn_start.config(state="disabled")
+
+        root.update()
+        label_width = failure_label.winfo_width()
+        label_height = failure_label.winfo_height()
+        root.geometry(f"{label_width}x{label_height}")
+
 
 def on_close():
     backend.close_connection(ser)
