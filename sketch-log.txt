@@ -1,0 +1,72 @@
+// Defining LED and flex sensor pins
+#define led_pin 8
+#define flex_pin A0
+
+// Variables for flex sensor readings and LED brightness output
+int flex_reading;
+int led_brightness;
+
+// Constants for smoothing
+const int numReadings = 10; // Number of readings for averaging
+int readings[numReadings];  // Array to store readings
+int readIndex = 0;          // Index of the current reading
+int total = 0;              // Running total of readings
+int average = 0;            // Average of readings
+
+// Threshold values for calibration (adjust based on sensor behavior)
+const int restThreshold = 366;    // Reading when the sensor is at rest
+const int maxFlexThreshold = 800; // Reading when the sensor is fully flexed
+
+void setup() {
+  // Initialize serial monitor and LED pin
+  pinMode(led_pin, OUTPUT);
+  Serial.begin(9600);
+
+  // Initialize the readings array
+  for (int i = 0; i < numReadings; i++) {
+    readings[i] = 0;
+  }
+}
+
+void loop() {
+  // Subtract the oldest reading
+  total = total - readings[readIndex];
+
+  // Read the new value from the flex sensor
+  flex_reading = analogRead(flex_pin);
+
+  // Add the new reading to the array
+  readings[readIndex] = flex_reading;
+
+  // Add the new reading to the total
+  total = total + readings[readIndex];
+
+  // Advance to the next position in the array
+  readIndex = (readIndex + 1) % numReadings;
+
+  // Calculate the average
+  average = total / numReadings;
+
+  // Map the smoothed reading to LED brightness
+  if (average <= restThreshold) {
+    led_brightness = 0; // Ensure brightness is 0 if below rest threshold
+  } else {
+    led_brightness = map(average, restThreshold, maxFlexThreshold, 0, 255);
+
+    // Constrain to ensure brightness stays within valid range
+    led_brightness = constrain(led_brightness, 0, 255);
+  }
+
+  // Output the brightness to the LED
+  analogWrite(led_pin, led_brightness);
+
+  // Print debug information to the serial monitor
+  Serial.print("Raw Reading: ");
+  Serial.print(flex_reading);
+  Serial.print(" | Smoothed Reading: ");
+  Serial.print(average);
+  Serial.print(" | LED Brightness: ");
+  Serial.println(led_brightness);
+
+  delay(200); // Delay for stability
+}
