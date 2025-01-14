@@ -59,13 +59,15 @@ def start_session():
     
     running = True
     threading.Thread(target=monitor_posture, daemon=True).start()
-    countdown(25 * 60) 
+    countdown(25 * 60)
 
 def stop_session():
-    """Stop the session."""
+    """Stop the session and reset the timer."""
     global running
     running = False
     posture_label.config(text="Session stopped.", bg="white")
+    timer_label.config(text="25:00")
+    btn_start.config(state="normal")
 
 def countdown(time_left):
     """Display countdown timer."""
