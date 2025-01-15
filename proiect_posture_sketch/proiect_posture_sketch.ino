@@ -8,6 +8,6 @@ void setup() {
 
 void loop() {
   int flex_value = analogRead(flex_pin);
-  Serial.println(flexVal);
+  Serial.println(flex_value);
   delay(1000);
 }

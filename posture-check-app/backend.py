@@ -33,3 +33,7 @@ def close_connection(ser):
     if ser and ser.is_open:
         ser.close()
         print("Connection closed.")
+
+if __name__ == '__main__':
+    ser = connect_to_arduino()
+    print(read_flex_value(ser))
