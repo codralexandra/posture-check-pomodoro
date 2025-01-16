@@ -1,25 +1,47 @@
-#define flex_pin1 A0
-#define flex_pin2 A1
-#define flex_pin3 A2
-#define flex_pin4 A3
+// const int flexPin = A0;          // Pin connected to voltage divider output
+// const float VCC = 5.0;           // Arduino supply voltage
+// const float R_DIV = 22.0;        // Resistor in voltage divider
+// const float flatResistance = 10.0;  // Resistance when flat
+// const float bendResistance = 30.0;  // Resistance when bent
 
-int threshold = 600; //modify this 
+// void setup() {
+//   Serial.begin(9600);
+//   pinMode(flexPin, INPUT);
+// }
 
-void setup() {
+// void loop() {
+//   // Read analog value
+//   int ADCflex = analogRead(flexPin);
+  
+//   // Calculate voltage
+//   float Vflex = ADCflex * VCC / 1023.0;
+  
+//   // Calculate resistance
+//   float Rflex = R_DIV * (VCC / Vflex - 1.0);
+//   Serial.println("Resistance: " + String(Rflex) + " ohms");
+  
+//   // Map resistance to bend angle
+//   float angle = map(Rflex, flatResistance, bendResistance, 0, 90.0);
+//   Serial.println("Bend: " + String(angle) + " degrees");
+//   Serial.println();
+  
+//   delay(500);
+// }
+
+int flexPin = A0;
+//const int ledPin = 3;
+void setup()
+{
+  //pinMode(ledPin,OUTPUT);
   Serial.begin(9600);
 }
 
-void loop() {
-  int flex_value1 = analogRead(flex_pin1);
-  int flex_value2 = analogRead(flex_pin2);
-  int flex_value3 = analogRead(flex_pin3);
-  int flex_value4 = analogRead(flex_pin4);
-  Serial.print(flex_value1);
-  Serial.print(",");
-  Serial.print(flex_value2);
-  Serial.print(",");
-  Serial.print(flex_value3);
-  Serial.print(",");
-  Serial.println(flex_value4);
-  delay(200);
+void loop()
+{
+  int value = analogRead(flexPin);
+  Serial.println(value);
+  //value=map(value,700,1000,0,255);
+  //analogWrite(ledPin,value);
+  //analogWrite(ledPin,255);
+  delay(100);
 }
