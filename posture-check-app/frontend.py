@@ -32,6 +32,7 @@ running = False
 ser = None
 posture_message_label = tk.Label(root, text="Checking connection...", font=("Arial", 16), fg="white", width=50, height=4)
 timer_label = None
+is_break_time = False
 
 # ---MAIN-WINDOW ---
 def main_window():
@@ -92,7 +93,10 @@ def perform_calibration():
 # ---POSTURE-MONITOR-WINDOW---
 def posture_monitor_window():
     """Window for monitoring posture."""
-    global timer_label, running
+    global timer_label, running, is_break_time
+
+    is_break_time = False  # Initialize break mode state
+
     for widget in root.winfo_children():
         widget.grid_forget()
 
@@ -109,32 +113,50 @@ def posture_monitor_window():
     btn_stop_session.grid(row=2, column=0, pady=10)
 
     threading.Thread(target=monitor_posture, daemon=True).start()
-    countdown(25 * 60)
+    countdown(1 * 60)  # Start the first 25-minute work session
 
 # --- POSTURE-MONITOR-LOGIC---
 def monitor_posture():
     """Monitor posture and update GUI."""
-    global running
+    global running, is_break_time
     while running:
-        value = backend.read_flex_value(ser)
-        print(value)
-        if value is not None:
-            if value > baseline + backend.offset:
-                posture_message_label.config(text="Uh oh, bad posture detected!", fg="red", bg="white")
-            else:
-                posture_message_label.config(text="Great job! Your posture is good.", fg="green", bg="white")
+        if not is_break_time:  # Skip monitoring during breaks
+            value = backend.read_flex_value(ser)
+            print(value)
+            if value is not None:
+                if value > baseline + backend.offset:
+                    posture_message_label.config(text="Uh oh, bad posture detected!", fg="red", bg="white")
+                else:
+                    posture_message_label.config(text="Great job! Your posture is good.", fg="green", bg="white")
         time.sleep(0.2)
 
+
 # ---POMODORO-TIMER---
-def countdown(time_left):
-    """Display countdown timer."""
+def countdown(time_left, is_break=False):
+    """Display countdown timer and handle alternating work and break sessions."""
+    global is_break_time  # Use this to manage the posture monitoring state
+
     if time_left > 0 and running:
         mins, secs = divmod(time_left, 60)
         timer_label.config(text=f"{mins:02}:{secs:02}")
-        root.after(1000, countdown, time_left - 1)
-    elif time_left == 0:
-        messagebox.showinfo("Pomodoro Complete", "Time is up! Take a break and stretch!")
-        stop_session()
+        if is_break:
+            is_break_time = True  # Enable break mode
+            posture_message_label.config(text="Break Time", fg="blue", bg="white")
+        else:
+            is_break_time = False  # Resume work mode
+        root.after(1000, countdown, time_left - 1, is_break)
+    elif time_left == 0 and running:
+        if is_break:
+            is_break_time = False  # End break mode
+            posture_message_label.config(text="Monitoring posture...", fg="white", bg="white")  # Reset label for work
+            messagebox.showinfo("Break Over", "Break time is over! Back to work!")
+            countdown(25 * 60, is_break=False)  # Start a 25-minute work session
+        else:
+            is_break_time = True  # Start break mode
+            posture_message_label.config(text="Break Time", fg="blue", bg="white")  # Update label for break
+            messagebox.showinfo("Pomodoro Complete", "Time is up! Take a 5-minute break!")
+            countdown(5 * 60, is_break=True)  # Start a 5-minute break
+
 
 # ---STOP-SESSION---
 def stop_session():
