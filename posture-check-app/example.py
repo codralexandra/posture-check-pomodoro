@@ -26,7 +26,7 @@ root.rowconfigure(index=2, weight=1)
 style = ttk.Style(root)
 
 # Import the tcl file
-root.tk.call("source", "posture-check-app/theme/forest-dark.tcl")
+root.tk.call("source", "./theme/forest-dark.tcl")
 
 # Set the theme with the theme_use method
 style.theme_use("forest-dark")
