@@ -1,15 +1,15 @@
 import serial
 import time
 
-arduino_port = 'COM6'  # Replace with your port
+arduino_port = 'COM6'  # Replace with your port (please)
 baud_rate = 9600
-offset = 15
+offset = 45 # Adjust the offset value after wearing (please again)
 
 def connect_to_arduino():
     """Connect to the Arduino and return the serial connection."""
     try:
         ser = serial.Serial(arduino_port, baud_rate, timeout=1)
-        time.sleep(2)  # Allow time for the connection to establish
+        time.sleep(2)
         print("Connected to Arduino")
         return ser
     except serial.SerialException as e:
@@ -19,9 +19,9 @@ def connect_to_arduino():
 def read_flex_value(ser):
     """Read a single value from the Arduino serial connection."""
     try:
-        if ser.in_waiting > 0:  # Check if data is available
+        if ser.in_waiting > 0:
             data = ser.readline().decode('utf-8').strip()
-            if data.isdigit():  # Check if the data is numeric
+            if data.isdigit():
                 return int(data)
         return None
     except Exception as e:
@@ -43,7 +43,7 @@ if __name__ == '__main__':
                 value = read_flex_value(ser)
                 if value is not None:
                     print(f"Flex value: {value}")
-                time.sleep(0.1)  # Adjust the delay to match your requirements
+                time.sleep(0.01)
         except KeyboardInterrupt:
             print("\nStopping...")
         finally:

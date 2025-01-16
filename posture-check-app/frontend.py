@@ -5,45 +5,40 @@ import time
 import threading
 import backend
 
-# --- Set Theme ---
+# --- THEME SETUP ---
 root = tk.Tk()
 root.title("Posture Monitor")
 root.geometry("500x400")
 root.option_add("*tearOff", False)
 
-# Configure grid layout for centering
-root.columnconfigure(0, weight=1)  # Center widgets in the column
-root.rowconfigure([0, 1, 2], weight=1)  # Equal weight to rows
+root.columnconfigure(0, weight=1)
+root.rowconfigure([0, 1, 2], weight=1)
 
-# Apply the Forest theme
 style = ttk.Style(root)
 root.tk.call('source', './theme/forest-dark.tcl')
 style.theme_use('forest-dark')
 
-# Title label centered
 title_label = ttk.Label(root, text="Posture Monitor", font=("Arial", 24), anchor="center", justify="center")
-title_label.grid(row=0, column=0, pady=10, sticky="nsew")  # Use "nsew" for full centering
+title_label.grid(row=0, column=0, pady=10, sticky="nsew")
 
-# Separator below the title
 separator = ttk.Separator(root)
 separator.grid(row=1, column=0, pady=10, sticky="ew")
 
-# Adjust column weight for centering
 root.grid_columnconfigure(0, weight=1)
 
-# --- Global Variables ---
+# ---GLOBALS----
 baseline = None
 running = False
 ser = None
 posture_message_label = tk.Label(root, text="Checking connection...", font=("Arial", 16), fg="white", width=50, height=4)
 timer_label = None
 
-# --- Main Window ---
+# ---MAIN-WINDOW ---
 def main_window():
     """Main window with Start, Information, Exit buttons."""
     global posture_message_label
     for widget in root.winfo_children():
-        widget.grid_forget()  # Clear the window
+        widget.grid_forget()
 
     title_label.grid(row=0, column=0, pady=10, sticky="ew")
     separator.grid(row=1, column=0, pady=10, sticky="ew")
@@ -58,7 +53,7 @@ def main_window():
     btn_exit = ttk.Button(root, text="Exit", command=exit_app)
     btn_exit.grid(row=5, column=0, pady=10)
 
-# --- Calibration Timer ---
+# ---CALIBRATION-TIMER---
 def start_calibration():
     """Start calibration and transition to posture monitoring."""
     for widget in root.winfo_children():
@@ -94,7 +89,7 @@ def perform_calibration():
         messagebox.showerror("Calibration", "Calibration failed. Please try again!")
         main_window()
 
-# --- Posture Monitoring Window ---
+# ---POSTURE-MONITOR-WINDOW---
 def posture_monitor_window():
     """Window for monitoring posture."""
     global timer_label, running
@@ -116,20 +111,21 @@ def posture_monitor_window():
     threading.Thread(target=monitor_posture, daemon=True).start()
     countdown(25 * 60)
 
-# --- Posture Monitoring Logic ---
+# --- POSTURE-MONITOR-LOGIC---
 def monitor_posture():
     """Monitor posture and update GUI."""
     global running
     while running:
         value = backend.read_flex_value(ser)
+        print(value)
         if value is not None:
             if value > baseline + backend.offset:
                 posture_message_label.config(text="Uh oh, bad posture detected!", fg="red", bg="white")
             else:
                 posture_message_label.config(text="Great job! Your posture is good.", fg="green", bg="white")
-        time.sleep(0.5)
+        time.sleep(0.2)
 
-# --- Countdown Timer ---
+# ---POMODORO-TIMER---
 def countdown(time_left):
     """Display countdown timer."""
     if time_left > 0 and running:
@@ -140,31 +136,43 @@ def countdown(time_left):
         messagebox.showinfo("Pomodoro Complete", "Time is up! Take a break and stretch!")
         stop_session()
 
-# --- Stop Session ---
+# ---STOP-SESSION---
 def stop_session():
     """Stop the session and reset to the main window."""
     global running
     running = False
-    # Reset background & main label
     theme_bg = style.lookup(".", "background")
     tk.Label(root, text="Connection established. Please calibrate to start!", font=("Arial", 16), fg="green", width=50, height=4)
     root.configure(bg=theme_bg)
 
     main_window()
 
-# --- Information Window ---
+# ---INFO-WINDOW---
 def information_window():
     """Information page."""
     for widget in root.winfo_children():
         widget.grid_forget()
 
     label_info = tk.Label(root, text="Information Page", font=("Arial", 24), fg="white")
-    label_info.grid(row=2, column=0, pady=20)
+    label_info.grid(row=0, column=0, pady=20)
+    
+    text_block = tk.Text(
+    root,
+    wrap="word",
+    font=("Arial", 14),
+    height=10,
+    width=40,
+    bd=0,                  # No border
+    highlightthickness=0   # No focus highlight border
+    )
+    text_block.insert("1.0", "This is a text block.\nYou can write multiple lines here.")
+    text_block.grid(row=1, column=0, pady=20)
+    text_block.config(state="disabled")
 
     btn_back = ttk.Button(root, text="Back", style="Accent.TButton", command=main_window)
     btn_back.grid(row=3, column=0, pady=10)
 
-# --- Initialize Connection ---
+# ---INIT-CONNECTION---
 def initialize_connection():
     global ser
     if not ser:
@@ -174,7 +182,7 @@ def initialize_connection():
         else:
             posture_message_label.config(text="Connection failed. Check the device!", fg="red", bg="white")
 
-# --- Exit App ---
+# ---EXIT---
 def exit_app():
     """Exit the application."""
     global running
@@ -183,7 +191,7 @@ def exit_app():
         backend.close_connection(ser)
     root.quit()
 
-# --- Main ---
+# ---MAIN---
 def on_close():
     """Handle app closure."""
     global running
