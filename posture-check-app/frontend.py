@@ -27,7 +27,7 @@ separator.grid(row=1, column=0, pady=10, sticky="ew")
 root.grid_columnconfigure(0, weight=1)
 
 # ---GLOBALS----
-baseline = None
+baselines = [None] * 4  # Baseline values for four sensors
 running = False
 ser = None
 posture_message_label = tk.Label(root, text="Checking connection...", font=("Arial", 16), fg="white", width=50, height=4)
@@ -70,22 +70,25 @@ def start_calibration():
         else:
             perform_calibration()
 
-    update_countdown(5)
+    update_countdown(10)
 
 def perform_calibration():
-    """Perform calibration and move to posture monitoring."""
-    global baseline
-    values = []
-    start_time = time.time()
-    while time.time() - start_time < 3:
-        value = backend.read_flex_value(ser)
-        if value is not None:
-            values.append(value)
+    """Perform calibration for all sensors and move to posture monitoring."""
+    global baselines
+    sensor_values = [[] for _ in range(4)]  # Separate lists for each sensor
 
-    if values:
-        baseline = sum(values) // len(values)
+    start_time = time.time()
+    while time.time() - start_time < 10:  # Collect data for 3 seconds
+        values = backend.read_flex_values(ser)  # Assume this returns a list of 4 sensor values
+        if values:
+            for i in range(4):
+                sensor_values[i].append(values[i])
+
+    if all(sensor_values):  # Ensure all sensors have data
+        baselines = [sum(sensor) // len(sensor) for sensor in sensor_values]
         messagebox.showinfo("Calibration", "Calibration complete!")
         posture_monitor_window()
+        print(f"Baselines: {baselines}")
     else:
         messagebox.showerror("Calibration", "Calibration failed. Please try again!")
         main_window()
@@ -95,7 +98,7 @@ def posture_monitor_window():
     """Window for monitoring posture."""
     global timer_label, running, is_break_time
 
-    is_break_time = False  # Initialize break mode state
+    is_break_time = False
 
     for widget in root.winfo_children():
         widget.grid_forget()
@@ -113,50 +116,50 @@ def posture_monitor_window():
     btn_stop_session.grid(row=2, column=0, pady=10)
 
     threading.Thread(target=monitor_posture, daemon=True).start()
-    countdown(1 * 60)  # Start the first 25-minute work session
+    countdown(25 * 60)
 
 # --- POSTURE-MONITOR-LOGIC---
 def monitor_posture():
     """Monitor posture and update GUI."""
     global running, is_break_time
     while running:
-        if not is_break_time:  # Skip monitoring during breaks
-            value = backend.read_flex_value(ser)
-            print(value)
-            if value is not None:
-                if value > baseline + backend.offset:
-                    posture_message_label.config(text="Uh oh, bad posture detected!", fg="red", bg="white")
+        if not is_break_time:
+            values = backend.read_flex_values(ser)  # Assume this returns a list of 4 sensor values
+            #print(values)
+            if values:
+                for i, value in enumerate(values):
+                    if value > baselines[i] + backend.offset:
+                        posture_message_label.config(text="Bad posture detected!", fg="red", bg="white")
+                        break
                 else:
                     posture_message_label.config(text="Great job! Your posture is good.", fg="green", bg="white")
         time.sleep(0.2)
 
-
 # ---POMODORO-TIMER---
 def countdown(time_left, is_break=False):
     """Display countdown timer and handle alternating work and break sessions."""
-    global is_break_time  # Use this to manage the posture monitoring state
+    global is_break_time
 
     if time_left > 0 and running:
         mins, secs = divmod(time_left, 60)
         timer_label.config(text=f"{mins:02}:{secs:02}")
         if is_break:
-            is_break_time = True  # Enable break mode
+            is_break_time = True
             posture_message_label.config(text="Break Time", fg="blue", bg="white")
         else:
-            is_break_time = False  # Resume work mode
+            is_break_time = False
         root.after(1000, countdown, time_left - 1, is_break)
     elif time_left == 0 and running:
         if is_break:
-            is_break_time = False  # End break mode
-            posture_message_label.config(text="Monitoring posture...", fg="white", bg="white")  # Reset label for work
+            is_break_time = False
+            posture_message_label.config(text="Monitoring posture...", fg="white", bg="white")
             messagebox.showinfo("Break Over", "Break time is over! Back to work!")
-            countdown(25 * 60, is_break=False)  # Start a 25-minute work session
+            countdown(25 * 60, is_break=False)
         else:
-            is_break_time = True  # Start break mode
-            posture_message_label.config(text="Break Time", fg="blue", bg="white")  # Update label for break
+            is_break_time = True
+            posture_message_label.config(text="Break Time", fg="blue", bg="white")
             messagebox.showinfo("Pomodoro Complete", "Time is up! Take a 5-minute break!")
-            countdown(5 * 60, is_break=True)  # Start a 5-minute break
-
+            countdown(5 * 60, is_break=True)
 
 # ---STOP-SESSION---
 def stop_session():
@@ -184,10 +187,10 @@ def information_window():
     font=("Arial", 14),
     height=10,
     width=40,
-    bd=0,                  # No border
-    highlightthickness=0   # No focus highlight border
+    bd=0,                  
+    highlightthickness=0 
     )
-    text_block.insert("1.0", "This is a text block.\nYou can write multiple lines here.")
+    text_block.insert("1.0", "Apply the sensor on key points of your back.\nThe app will notify when your posture changes throughout the work session.")
     text_block.grid(row=1, column=0, pady=20)
     text_block.config(state="disabled")
 
