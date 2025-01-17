@@ -189,7 +189,7 @@ def information_window():
     bd=0,                  # No border
     highlightthickness=0   # No focus highlight border
     )
-    text_block.insert("1.0", "This is a text block.\nYou can write multiple lines here.")
+    text_block.insert("1.0", "Stick the sensor to key bend points of the spine.\nThe app will alert you when your posture changes!")
     text_block.grid(row=1, column=0, pady=20)
     text_block.config(state="disabled")
 

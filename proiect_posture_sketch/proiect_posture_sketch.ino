@@ -38,10 +38,24 @@ void setup()
 
 void loop()
 {
-  int value = analogRead(flexPin);
-  Serial.println(value);
-  //value=map(value,700,1000,0,255);
-  //analogWrite(ledPin,value);
-  //analogWrite(ledPin,255);
+  // int value = analogRead(flexPin);
+  // Serial.println(value);
+  // //value=map(value,700,1000,0,255);
+  // //analogWrite(ledPin,value);
+  // //analogWrite(ledPin,255);
+  // delay(100);
+  int rawValue = analogRead(flexPin); // Read the raw analog value
+  //Serial.print("Raw Value: ");
+  Serial.println(rawValue);
+
+  // Map the raw value (1014-1022) to 0-180
+  // int mappedValue = map(rawValue, 1014, 1022, 0, 180);
+
+  // // Ensure the value stays within the range 0-180
+  // mappedValue = constrain(mappedValue, 0, 180);
+
+  // Serial.print("Mapped Value: ");
+  // Serial.println(mappedValue);
+
   delay(100);
 }

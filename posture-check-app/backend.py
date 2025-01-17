@@ -34,17 +34,17 @@ def close_connection(ser):
         ser.close()
         print("Connection closed.")
 
-# if __name__ == '__main__':
-#     ser = connect_to_arduino()
-#     if ser:
-#         try:
-#             print("Reading flex sensor values. Press Ctrl+C to stop.")
-#             while True:
-#                 value = read_flex_value(ser)
-#                 if value is not None:
-#                     print(f"Flex value: {value}")
-#                 time.sleep(0.01)
-#         except KeyboardInterrupt:
-#             print("\nStopping...")
-#         finally:
-#             close_connection(ser)
+if __name__ == '__main__':
+    ser = connect_to_arduino()
+    if ser:
+        try:
+            print("Reading flex sensor values. Press Ctrl+C to stop.")
+            while True:
+                value = read_flex_value(ser)
+                if value is not None:
+                    print(f"Flex value: {value}")
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            print("\nStopping...")
+        finally:
+            close_connection(ser)
