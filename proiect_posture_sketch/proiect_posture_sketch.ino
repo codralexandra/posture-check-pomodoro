@@ -29,6 +29,9 @@
 // }
 
 int flexPin = A0;
+int flexPin2 = A1;
+int flexPin3 = A2;
+int flexPin4 = A3;
 //const int ledPin = 3;
 void setup()
 {
@@ -44,18 +47,27 @@ void loop()
   // //analogWrite(ledPin,value);
   // //analogWrite(ledPin,255);
   // delay(100);
-  int rawValue = analogRead(flexPin); // Read the raw analog value
+  int rawValue1 = analogRead(flexPin); // Read the raw analog value
+  int rawValue2 = analogRead(flexPin2);
+  int rawValue3 = analogRead(flexPin3);
+  int rawValue4 = analogRead(flexPin4);
   //Serial.print("Raw Value: ");
-  Serial.println(rawValue);
 
+  //Serial.println(String(rawValue1) +","+ String(rawValue2)+","+ String(rawValue3)+","+ String(rawValue4));
+  int average = (rawValue1 + rawValue2 + rawValue3 + rawValue4) / 4;
+  Serial.println(average);
   // Map the raw value (1014-1022) to 0-180
-  // int mappedValue = map(rawValue, 1014, 1022, 0, 180);
+  int mappedValue1 = map(rawValue1, 760, 926, 0, 180);
+  int mappedValue2 = map(rawValue2, 1010, 1021, 0, 180);
+  int mappedValue3 = map(rawValue3, 794, 960, 0, 180);
+  int mappedValue4 = map(rawValue4, 1010, 1021, 0, 180);
 
   // // Ensure the value stays within the range 0-180
   // mappedValue = constrain(mappedValue, 0, 180);
 
   // Serial.print("Mapped Value: ");
   // Serial.println(mappedValue);
+  //Serial.println(String(mappedValue1) +","+ String(mappedValue2)+","+ String(mappedValue3)+","+ String(mappedValue4));
 
   delay(100);
 }

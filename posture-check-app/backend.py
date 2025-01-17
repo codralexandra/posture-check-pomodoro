@@ -1,7 +1,7 @@
 import serial
 import time
 
-arduino_port = 'COM6'  # Replace with your port (please)
+arduino_port = 'COM8'  # Replace with your port (please)
 baud_rate = 9600
 offset = 5 # Adjust the offset value after wearing (please again)
 
